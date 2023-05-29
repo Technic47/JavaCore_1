@@ -3,8 +3,6 @@ package ru.geekbrains.lesson2;
 import java.util.*;
 
 public class Program {
-
-
     private static final int WIN_COUNT = 6; // Условие выигрыша
     private static final int fieldSizeX = 10; // Размерность игрового поля
     private static final int fieldSizeY = 10; // Размерность игрового поля
@@ -35,9 +33,7 @@ public class Program {
         }
     }
 
-    /**
-     * Инициализация игрового поля
-     */
+    //Инициализация игрового поля
     private static void initialize() {
         field = new char[fieldSizeX][fieldSizeY];
         // Пройдем по всем элементам массива
@@ -86,13 +82,7 @@ public class Program {
         field[x][y] = DOT_HUMAN;
     }
 
-    /**
-     * Проверка, ячейка является пустой
-     *
-     * @param x
-     * @param y
-     * @return
-     */
+    //Проверка, ячейка является пустой
     static boolean isCellEmpty(int x, int y) {
         return field[x][y] == DOT_EMPTY;
     }
@@ -110,7 +100,8 @@ public class Program {
     }
 
     /**
-     * Ход компьютера
+     * Ход компьютера.
+     * Компьютер смотрит на свои возможные комбинации и на игрока.
      */
     private static void aiTurn() {
         Queue<Integer[]> aiStrategy = fieldCheck(DOT_AI);
@@ -122,6 +113,7 @@ public class Program {
         }
     }
 
+    // Проверка идёт по комбинациям в списке. Если хоть одна == WIN_COUNT, то победа зачитывается
     static boolean checkWin(char symbol) {
         for (List<Queue<Integer[]>> variant : getAllVariants(symbol)) {
             for (Queue<Integer[]> integers : variant) {
@@ -145,6 +137,7 @@ public class Program {
         return calcStrategy(getAllVariants(symbol));
     }
 
+    //Список со всем вариантами ходов
     static List<List<Queue<Integer[]>>> getAllVariants(char symbol) {
         List<List<Queue<Integer[]>>> allVariants = new ArrayList<>();
         for (int x = 0; x < fieldSizeX; x++) {
@@ -157,7 +150,8 @@ public class Program {
         return allVariants;
     }
 
-    //поиск наилучшей стратегии для хода
+    //Поиск наилучшей стратегии для хода.
+    //Идея - найти ту стратегию, которая самая быстрая.
     static Queue<Integer[]> calcStrategy(List<List<Queue<Integer[]>>> allVariants) {
         int max = 0;
         //поиск наибольшего количества вариантов выигрыша
@@ -175,7 +169,7 @@ public class Program {
         int steps = WIN_COUNT;
         for (List<Queue<Integer[]>> list : shortListVariants) {
             for (Queue<Integer[]> integers : list) {
-                //проверяем количество шагов до выигрыша
+                //проверяем количество шагов до выигрыша в каждой стратегии
                 int currentSteps = 0;
                 if (integers != null) {
                     for (Integer[] integer : integers) {
@@ -183,7 +177,7 @@ public class Program {
                             currentSteps++;
                         }
                     }
-                    //обновляем наименьшее количество шагов
+                    //обновляем наименьшее количество ходов до выигрыша
                     if (currentSteps <= steps) {
                         steps = currentSteps;
                         fatsStrategy = integers;
@@ -194,12 +188,20 @@ public class Program {
         return fatsStrategy;
     }
 
-    //определение хода с учётом возможности победы человека
+    /**
+     * Определение хода с учётом возможности победы игрока.
+     * Если у игрока больше шансов, то компьютер вредит игроку.
+     * Иначе - играет свои комбинации.
+     *
+     * @param aiStrategy    стратегия компьютера.
+     * @param humanStrategy стратегия игрока.
+     * @return координаты следующего хода.
+     */
     static Integer[] nextTurnCalc(Queue<Integer[]> aiStrategy, Queue<Integer[]> humanStrategy) {
+        //Если нет возможных стратегий, то ничья - играть дальше бессмысленно.
         if (humanStrategy == null && aiStrategy == null) {
             DRAW = true;
         } else {
-
             int aiTurns;
             int humanTurns;
             if (aiStrategy != null) {
@@ -219,8 +221,10 @@ public class Program {
         return null;
     }
 
+    //Подсчёт ходов в стратегии.
     static int turnsCount(Queue<Integer[]> Strategy) {
         int result = 0;
+        //Если стоит 1, значит туда уже ходили. Учитывать не надо.
         for (Integer[] integers : Strategy) {
             if (integers[0] == 0) {
                 result++;
@@ -251,7 +255,14 @@ public class Program {
         }
     }
 
-    //Создание списка вариантов ходов для конкретной точки
+    /**
+     * Создание списка вариантов ходов для конкретной точки.
+     *
+     * @param symbol символ для проверки
+     * @param x      координата.
+     * @param y      координата.
+     * @return список стратегий для разыгрывания хода.
+     */
     static List<Queue<Integer[]>> queueCheck(char symbol, int x, int y) {
         List<Queue<Integer[]>> variants = new ArrayList<>();
         variants.add(vertCheck(symbol, x, y));
@@ -261,6 +272,7 @@ public class Program {
         return variants;
     }
 
+    //проверяем вертикаль
     static Queue<Integer[]> vertCheck(char symbol, int x, int y) {
         Queue<Integer[]> queue = new ArrayDeque<>();
         int j = y;
@@ -277,6 +289,7 @@ public class Program {
         return null;
     }
 
+    //проверяем горизонталь
     static Queue<Integer[]> horizCheck(char symbol, int x, int y) {
         Queue<Integer[]> queue = new ArrayDeque<>();
         int i = x;
@@ -293,6 +306,7 @@ public class Program {
         return null;
     }
 
+    //проверяем правильную диагональ
     static Queue<Integer[]> rightDiagCheck(char symbol, int x, int y) {
         Queue<Integer[]> queue = new ArrayDeque<>();
         int i = x;
@@ -313,6 +327,7 @@ public class Program {
         return null;
     }
 
+    //проверяем неправильную диагональ
     static Queue<Integer[]> wrongDiagCheck(char symbol, int x, int y) {
         Queue<Integer[]> queue = new ArrayDeque<>();
         int i = x;
@@ -357,22 +372,12 @@ public class Program {
         } else return false;
     }
 
-    /**
-     * Проверка на ничью
-     *
-     * @return
-     */
+    //Проверка на ничью
     static boolean checkDraw() {
         return DRAW;
     }
 
-    /**
-     * Метод проверки состояния игры
-     *
-     * @param c
-     * @param str
-     * @return
-     */
+    //Метод проверки состояния игры
     static boolean gameCheck(char c, String str) {
         if (checkWin(c)) {
             System.out.println(str);
@@ -385,5 +390,4 @@ public class Program {
 
         return false; // Игра продолжается
     }
-
 }
